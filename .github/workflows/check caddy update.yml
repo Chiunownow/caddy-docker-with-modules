@@ -1,34 +1,37 @@
-name: Check for Caddy updates
-
+name: Check Caddy Version
 on:
   schedule:
-    - cron: '0 0 * * *'  # 每天检查一次
+    - cron: '0 0 * * *'  # Runs every day at midnight
   workflow_dispatch:
 
 jobs:
-  check-updates:
+  check-version:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-      with:
-        persist-credentials: false
+      - name: Check out code
+        uses: actions/checkout@v2
 
-    - name: Check for new releases
-      id: check
-      run: |
-        LATEST_RELEASE=$(curl --silent "https://api.github.com/repos/caddyserver/caddy/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-        echo "LATEST_RELEASE=$LATEST_RELEASE" >> $GITHUB_ENV
+      - name: Install jq
+        run: sudo apt-get install jq
 
-    - name: Compare with previous release
-      id: compare
-      run: |
-        if [[ "$LATEST_RELEASE" != "$(cat latest_release.txt)" ]]; then
-          echo "New release found: $LATEST_RELEASE"
-          echo "$LATEST_RELEASE" > latest_release.txt
-          echo "NEW_RELEASE=true" >> $GITHUB_ENV
-        else
-          echo "No new release found."
-          echo "NEW_RELEASE=false" >> $GITHUB_ENV
-        fi
+      - name: Check for caddy_latest_release.txt
+        run: touch caddy_latest_release.txt
+
+      - name: Get latest Caddy version
+        id: caddy-version
+        run: |
+          echo "::set-output name=version::$(curl --silent "https://api.github.com/repos/caddyserver/caddy/releases/latest" | jq -r .tag_name)"
+
+      - name: Compare versions and update file
+        run: |
+          if [[ "${{ steps.caddy-version.outputs.version }}" != "$(cat caddy_latest_release.txt)" ]]; then
+            echo "${{ steps.caddy-version.outputs.version }}" > caddy_latest_release.txt
+            echo "::set-output name=version-updated::true"
+          else
+            echo "::set-output name=version-updated::false"
+          fi
+        id: compare-versions
+
+      - name: Run another action
+        if: steps.compare-versions.outputs.version-updated == 'true'
+        run: echo "Running another action..."
