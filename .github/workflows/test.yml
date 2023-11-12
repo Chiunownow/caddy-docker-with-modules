@@ -1,0 +1,10 @@
+on: 
+  workflow_call:
+
+jobs:
+  some_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ehco something
+        run: ehco "good"
+      
