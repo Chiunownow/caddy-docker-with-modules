@@ -1,0 +1,7 @@
+on: 
+  workflow_dispatch:
+    jobs:
+      call_workflow:
+        runs-on: alpine
+        steps:
+          - uses: ./.github/workflows/test.yml
