@@ -6,4 +6,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: call wf
-        uses: ./.github/workflows/test.yml@main
+        uses: Chiunownow/caddy-extra/.github/workflows/test.yml@main
