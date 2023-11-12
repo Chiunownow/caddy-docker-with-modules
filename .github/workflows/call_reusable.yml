@@ -3,4 +3,4 @@ on:
   
 jobs:
   call_workflow:
-    uses: ./.github/workflows/test.yml@main
+    uses: ./.github/workflows/test.yml
