@@ -6,6 +6,6 @@ jobs:
   some_test:
     runs-on: ubuntu-latest
     steps:
-      - name: ehco something
-        run: ehco "good"
+      - name: echo something
+        run: echo "good"
       
