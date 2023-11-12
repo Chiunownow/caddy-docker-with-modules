@@ -39,6 +39,9 @@ jobs:
           git commit -m "Update Caddy version to ${{ env.CADDY_VERSION }}"
           git push
         if: env.VERSION_UPDATED == 'true'
+        
+      - name: Check out code agant
+        uses: actions/checkout@v3
 
       - name: Run another action
         uses: ./.github/workflows/test.yml
