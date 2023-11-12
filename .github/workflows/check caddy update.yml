@@ -37,7 +37,9 @@ jobs:
           git config --local user.name "GitHub Action"
           git add caddy_latest_release.txt
           git commit -m "Update Caddy version to ${{ env.CADDY_VERSION }}"
-          git push
+          git push origin HEAD:master
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         if: env.VERSION_UPDATED == 'true'
 
       - name: Run another action
