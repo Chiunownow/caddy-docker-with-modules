@@ -41,5 +41,5 @@ jobs:
         if: env.VERSION_UPDATED == 'true'
 
       - name: Run another action
-        uses: chiunownow/caddy-extra/workflows/docker-publish.yml@main
+        uses: ${{github.repository}}/workflows/docker-publish.yml@main
         if: env.VERSION_UPDATED == 'false'
