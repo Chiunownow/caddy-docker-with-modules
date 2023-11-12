@@ -5,7 +5,5 @@ jobs:
   call_workflow:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code
-        uses: actions/checkout
       - name: call wf
-        uses: ./.github/workflows/test.yml
+        uses: ./.github/workflows/test.yml@main
