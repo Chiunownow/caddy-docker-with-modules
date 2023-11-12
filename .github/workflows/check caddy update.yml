@@ -37,6 +37,6 @@ jobs:
   trigger-workflow:
     needs: check-version
     if: ${{ needs.check-version.outputs.trigger_workflow == 'true' }}
-    uses: ./.github/workflows/test.yml
+    uses: ./.github/workflows/docker-publish.yml
 
 
