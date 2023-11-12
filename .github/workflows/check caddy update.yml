@@ -20,17 +20,16 @@ jobs:
       - name: Get latest Caddy version
         id: caddy-version
         run: |
-          echo "::set-output name=version::$(curl --silent "https://api.github.com/repos/caddyserver/caddy/releases/latest" | jq -r .tag_name)"
+          echo "CADDY_VERSION=$(curl --silent "https://api.github.com/repos/caddyserver/caddy/releases/latest" | jq -r .tag_name)" >> $GITHUB_ENV
 
       - name: Compare versions and update file
         run: |
-          if [[ "${{ steps.caddy-version.outputs.version }}" != "$(cat caddy_latest_release.txt)" ]]; then
-            echo "${{ steps.caddy-version.outputs.version }}" > caddy_latest_release.txt
-            echo "::set-output name=version-updated::true"
+          if [[ "${{ env.CADDY_VERSION }}" != "$(cat caddy_latest_release.txt)" ]]; then
+            echo "${{ env.CADDY_VERSION }}" > caddy_latest_release.txt
+            echo "VERSION_UPDATED=true" >> $GITHUB_ENV
           else
-            echo "::set-output name=version-updated::false"
+            echo "VERSION_UPDATED=false" >> $GITHUB_ENV
           fi
-        id: compare-versions
 
       - name: Run another action
         if: steps.compare-versions.outputs.version-updated == 'true'
