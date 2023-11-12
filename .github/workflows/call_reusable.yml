@@ -1,6 +1,0 @@
-on: 
-  workflow_dispatch:
-  
-jobs:
-  call_workflow:
-    uses: ./.github/workflows/test.yml
