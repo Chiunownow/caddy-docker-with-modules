@@ -27,14 +27,16 @@ jobs:
             echo "TRIGGER_WORKFLOW=false" >> $GITHUB_ENV
           fi
       - name: Commit and push if version updated
+        if: ${{ env.TRIGGER_WORKFLOW == 'true' }}
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add caddy_latest_releases.txt
           git commit -m "Update Caddy version to ${{ env.VERSION }}"
           git push
-        if: ${{ env.TRIGGER_WORKFLOW == 'true' }}
+  trigger-workflow:
+    needs: check-version
+    if: ${{ needs.check-version.outputs.trigger_workflow == 'true' }}
+    uses: ./.github/workflow/test.yml
 
-      - name: Run another action
-        if: ${{ env.TRIGGER_WORKFLOW == 'true' }}
-        uses: ./.github/workflows/test.yml
+
