@@ -11,38 +11,30 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
 
-      - name: Install jq
-        run: sudo apt-get install jq
+      - name: Create caddy_latest_releases.txt if not exists
+        run: touch caddy_latest_releases.txt
 
-      - name: Check for caddy_latest_release.txt
-        run: touch caddy_latest_release.txt
-
-      - name: Get latest Caddy version
-        id: caddy-version
+      - name: Get latest release version
         run: |
-          echo "CADDY_VERSION=$(curl --silent "https://api.github.com/repos/caddyserver/caddy/releases/latest" | jq -r .tag_name)" >> $GITHUB_ENV
-
-      - name: Compare versions and update file
+          echo "VERSION=$(curl --silent "https://api.github.com/repos/caddyserver/caddy/releases/latest" | sed -nE 's/.*"tag_name": "([^"]*).*/\1/p')" >> $GITHUB_ENV
+      - name: Compare and update version
         run: |
-          if [[ "${{ env.CADDY_VERSION }}" != "$(cat caddy_latest_release.txt)" ]]; then
-            echo "${{ env.CADDY_VERSION }}" > caddy_latest_release.txt
-            echo "VERSION_UPDATED=true" >> $GITHUB_ENV
+          FILE_VERSION=$(cat caddy_latest_releases.txt)
+          if [ "$FILE_VERSION" != "$VERSION" ]; then
+            echo "$VERSION" > caddy_latest_releases.txt
+            echo "TRIGGER_WORKFLOW=true" >> $GITHUB_ENV
           else
-            echo "VERSION_UPDATED=false" >> $GITHUB_ENV
+            echo "TRIGGER_WORKFLOW=false" >> $GITHUB_ENV
           fi
-
       - name: Commit and push if version updated
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add caddy_latest_release.txt
-          git commit -m "Update Caddy version to ${{ env.CADDY_VERSION }}"
+          git add caddy_latest_releases.txt
+          git commit -m "Update Caddy version to ${{ env.VERSION }}"
           git push
-        if: env.VERSION_UPDATED == 'true'
-        
-      - name: Check out code agant
-        uses: actions/checkout@v3
+        if: ${{ env.TRIGGER_WORKFLOW == 'true' }}
 
       - name: Run another action
+        if: ${{ env.TRIGGER_WORKFLOW == 'true' }}
         uses: ./.github/workflows/test.yml
-        #if: env.VERSION_UPDATED == 'false'
