@@ -3,6 +3,7 @@ name: Check for Caddy updates
 on:
   schedule:
     - cron: '0 0 * * *'  # 每天检查一次
+  workflow_dispatch:
 
 jobs:
   check-updates:
