@@ -41,5 +41,5 @@ jobs:
         if: env.VERSION_UPDATED == 'true'
 
       - name: Run another action
-        uses: ./.github/workflows/docker-publish.yml
-        if: env.VERSION_UPDATED == 'false'
+        uses: ./.github/workflows/test.yml
+        #if: env.VERSION_UPDATED == 'false'
