@@ -1,0 +1,29 @@
+name: Check for Caddy updates
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # 每天检查一次
+  workflow_dispatch:
+
+jobs:
+  check-updates:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check for new releases
+      id: check
+      run: |
+        LATEST_RELEASE=$(curl --silent "https://api.github.com/repos/caddyserver/caddy/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+        echo "LATEST_RELEASE=$LATEST_RELEASE" >> $GITHUB_ENV
+
+    - name: Compare with previous release
+      id: compare
+      run: |
+        if [[ "$LATEST_RELEASE" != "$(cat latest_release.txt)" ]]; then
+          echo "New release found: $LATEST_RELEASE"
+          echo "$LATEST_RELEASE" > latest_release.txt
+          echo "NEW_RELEASE=true" >> $GITHUB_ENV
+        else
+          echo "No new release found."
+          echo "NEW_RELEASE=false" >> $GITHUB_ENV
+        fi
