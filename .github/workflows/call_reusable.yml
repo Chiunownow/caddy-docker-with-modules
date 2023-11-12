@@ -3,7 +3,4 @@ on:
   
 jobs:
   call_workflow:
-    runs-on: ubuntu-latest
-    steps:
-      - name: call wf
-        uses: Chiunownow/caddy-extra/.github/workflows/test.yml@main
+    uses: ./.github/workflows/test.yml@main
