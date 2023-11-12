@@ -11,7 +11,7 @@ on:
   push:
     branches: [ "main" ]
     # Publish semver tags as releases.
-    tags: [ 'v*.*.*', 'latest', '${{github.run_number}}']
+    tags: [ 'v*.*.*', 'latest']
   pull_request:
     branches: [ "main" ]
 
