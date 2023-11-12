@@ -34,6 +34,8 @@ jobs:
           git add caddy_latest_releases.txt
           git commit -m "Update Caddy version to ${{ env.VERSION }}"
           git push
+    outputs:
+      trigger_workflow: ${{ env.TRIGGER_WORKFLOW }}
   trigger-workflow:
     needs: check-version
     if: ${{ needs.check-version.outputs.trigger_workflow == 'true' }}
