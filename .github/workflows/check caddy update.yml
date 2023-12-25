@@ -26,6 +26,7 @@ jobs:
           else
             echo "TRIGGER_WORKFLOW=false" >> $GITHUB_ENV
           fi
+            echo Trigger is ${{TRIGGER_WORKFLOW}}
       - name: Commit and push if version updated
         if: ${{ env.TRIGGER_WORKFLOW == 'true' }}
         run: |
