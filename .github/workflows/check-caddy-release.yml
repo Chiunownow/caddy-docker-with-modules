@@ -1,0 +1,57 @@
+name: Check Caddy Release
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # 每天 UTC 0:00 运行一次
+
+jobs:
+  check_new_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cache latest release tag
+        id: cache_latest_tag
+        uses: actions/cache@v3
+        with:
+          path: .latest_release_tag
+          key: latest-release-tag
+
+      - name: Check latest release of caddyserver/caddy
+        id: check_release
+        run: |
+          # 获取最新的 Release Tag
+          LATEST_TAG=$(curl -s https://api.github.com/repos/caddyserver/caddy/releases/latest | jq -r .tag_name)
+          echo "Latest release tag from GitHub: $LATEST_TAG"
+
+          # 如果存在缓存文件则读取
+          if [ -f .latest_release_tag ]; then
+            LAST_TAG=$(cat .latest_release_tag)
+          else
+            LAST_TAG=""
+          fi
+
+          echo "Last cached release tag: $LAST_TAG"
+          echo "::set-output name=last_tag::$LAST_TAG"
+          echo "::set-output name=latest_tag::$LATEST_TAG"
+
+          # 更新缓存文件
+          echo "$LATEST_TAG" > .latest_release_tag
+
+      - name: Trigger docker_build_and_publish action on new release
+        if: ${{ steps.check_release.outputs.latest_tag != steps.check_release.outputs.last_tag }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            // 触发 docker_build_and_publish.yml
+            await github.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'docker_build_and_publish.yml',
+              ref: context.ref,
+            })
+
+      - name: Update cache
+        if: ${{ steps.check_release.outputs.latest_tag != steps.check_release.outputs.last_tag }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: latest-release-tag
+          path: .latest_release_tag
