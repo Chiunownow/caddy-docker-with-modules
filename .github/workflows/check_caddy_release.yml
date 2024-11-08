@@ -1,6 +1,7 @@
 name: Check Caddy Release
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '0 0 * * *'  # 每天 UTC 0:00 运行一次
 
