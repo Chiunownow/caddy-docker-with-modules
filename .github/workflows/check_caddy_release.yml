@@ -1,7 +1,6 @@
 name: Check Caddy Release
 
 on:
-  workflow_dispatch:
   schedule:
     - cron: '0 0 * * *'  # 每天 UTC 0:00 运行一次
 
@@ -31,27 +30,25 @@ jobs:
           fi
 
           echo "Last cached release tag: $LAST_TAG"
-          echo "::set-output name=last_tag::$LAST_TAG"
-          echo "::set-output name=latest_tag::$LATEST_TAG"
+
+          # 使用 Environment Files 替代 set-output
+          echo "last_tag=$LAST_TAG" >> $GITHUB_ENV
+          echo "latest_tag=$LATEST_TAG" >> $GITHUB_ENV
 
           # 更新缓存文件
           echo "$LATEST_TAG" > .latest_release_tag
 
       - name: Trigger docker_build_and_publish action on new release
-        if: ${{ steps.check_release.outputs.latest_tag != steps.check_release.outputs.last_tag }}
-        uses: actions/github-script@v6
-        with:
-          script: |
-            // 触发 docker_build_and_publish.yml
-            await github.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'docker_build_and_publish.yml',
-              ref: context.ref,
-            })
+        if: ${{ env.latest_tag != env.last_tag }}
+        run: |
+          # 调用 GitHub API 触发 docker_build_and_publish 工作流
+          curl -X POST -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/docker_build_and_publish.yml/dispatches \
+            -d "{\"ref\":\"${GITHUB_REF}\",\"inputs\":{\"caddy_release_tag\":\"${{ env.latest_tag }}\"}}"
 
       - name: Update cache
-        if: ${{ steps.check_release.outputs.latest_tag != steps.check_release.outputs.last_tag }}
+        if: ${{ env.latest_tag != env.last_tag }}
         uses: actions/upload-artifact@v3
         with:
           name: latest-release-tag
