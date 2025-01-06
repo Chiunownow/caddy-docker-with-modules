@@ -44,7 +44,7 @@ jobs:
         run: |
           DOWNLOAD_URL="https://caddyserver.com/api/download?os=${{ steps.read-config.outputs.os }}&arch=${{ steps.read-config.outputs.arch }}&${{ steps.read-config.outputs.plugins }}"
           wget -O caddy "${DOWNLOAD_URL}"
-          chmod +x caddy_linux_amd64_custom
+          chmod +x caddy
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
