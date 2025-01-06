@@ -1,0 +1,5 @@
+os: linux
+arch: amd64
+plugins: 
+  - github.com/mholt/caddy-webdav
+  - github.com/caddy-dns/cloudflare

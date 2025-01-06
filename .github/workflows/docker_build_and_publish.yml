@@ -15,6 +15,16 @@ jobs:
       - name: Check out the code
         uses: actions/checkout@v3
 
+      - name: Read config.yml
+        id: read-config
+        run: |
+          OS=$(yq e '.os' ./config.yml)
+          ARCH=$(yq e '.arch' ./config.yml)
+          PLUGINS=$(yq e '.plugins[] | "-p=" + .' ./config.yml | paste -sd "&" -)
+          echo "os=${OS}" >> $GITHUB_OUTPUT
+          echo "arch=${ARCH}" >> $GITHUB_OUTPUT
+          echo "plugins=${PLUGINS}" >> $GITHUB_OUTPUT
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -29,6 +39,12 @@ jobs:
         name: Repository to lowercase
         run: |
           echo "repository=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
+
+      - name: Download Caddy with plugins
+        run: |
+          DOWNLOAD_URL="https://caddyserver.com/api/download?os=${{ steps.read-config.outputs.os }}&arch=${{ steps.read-config.outputs.arch }}&${{ steps.read-config.outputs.plugins }}"
+          wget -O caddy "${DOWNLOAD_URL}"
+          chmod +x caddy_linux_amd64_custom
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
