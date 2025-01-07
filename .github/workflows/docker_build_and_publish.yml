@@ -18,12 +18,7 @@ jobs:
       - name: Read config.yml
         id: read-config
         run: |
-          OS=$(yq e '.os' ./config.yml)
-          ARCH=$(yq e '.arch' ./config.yml)
-          PACKAGES=$(yq e '.packages[]' ./config.yml | paste -sd " " -)
-          echo "os=${OS}" >> $GITHUB_OUTPUT
-          echo "arch=${ARCH}" >> $GITHUB_OUTPUT
-          echo "packages=${PACKAGES}" >> $GITHUB_OUTPUT
+          echo "packages=$(yq e '.packages[]' ./config.yml | paste -sd " ")" >> $GITHUB_OUTPUT
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
@@ -37,14 +32,7 @@ jobs:
 
       - id: lower-repo
         name: Repository to lowercase
-        run: |
-          echo "repository=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
-
-      - name: Download Caddy with plugins
-        run: |
-          DOWNLOAD_URL="https://caddyserver.com/api/download?os=${{ steps.read-config.outputs.os }}&arch=${{ steps.read-config.outputs.arch }}&${{ steps.read-config.outputs.plugins }}"
-          wget -O caddy "${DOWNLOAD_URL}"
-          chmod +x caddy
+        run: echo "repository=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -52,8 +40,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          build-args: |
-            packages=${{ steps.read-config.outputs.packages }}
+          build-args: packages=${{ steps.read-config.outputs.packages }}
           tags: |
             ghcr.io/${{ steps.lower-repo.outputs.repository }}:latest
             ghcr.io/${{ steps.lower-repo.outputs.repository }}:${{ github.event.inputs.caddy_release_tag }}
