@@ -1,5 +1,3 @@
-# README
-
 ## Overview
 
 A script to run Caddy in Docker and install additional plugins if needed.
